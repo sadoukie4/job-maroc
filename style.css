@@ -36,3 +36,4 @@ a.card.big .logo{width:84px;height:84px;margin:0 auto 10px}
 a.card.big .ini{width:84px;height:84px;margin:0 auto 10px;border-radius:12px;background:var(--bg);border:1px solid var(--b);display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:700;color:var(--c)}
 a.card.big h3{font-size:17px}
 a.card.big .ds{font-size:14px;color:#6b7480;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;text-align:start;margin-top:6px}
+.btn.wa{background:#25D366;color:#073b1e}
