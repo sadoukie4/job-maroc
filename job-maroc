@@ -1,4 +1,0 @@
-   const CONFIG = {
-     URL: "https://expmcczlujsrhcfzyoff.supabase.co",
-     KEY: "COLLEZ_ICI_VOTRE_CLE"
-   };
