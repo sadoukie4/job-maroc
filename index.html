@@ -6,21 +6,39 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="config.js"></script><script src="app.js"></script></head>
 <body><header id="hd"></header><main>
+<section class="hero">
+<h1 id="ht"></h1>
 <form id="f"><input id="q" data-p="job">
 <div class="row"><select id="c"></select><select id="s"></select></div>
 <button class="btn" data-i="search"></button></form>
-<h2 data-i="latest"></h2><div id="list"></div></main>
+</section>
+<h2 class="sec" id="rt"></h2><div class="strip" id="strip"></div>
+<h2 class="sec" data-i="latest"></h2><div class="grid" id="list"></div></main>
 <script>
 init();opts(c,CITIES,1);opts(s,SECTORS,1);
+rt.textContent=lang==='ar'?'شركات تقوم بالتوظيف':'Les entreprises qui recrutent';
 async function load(){
-  let r=sb.from('jobs').select('id,title,company,city,sector').eq('status','approved').order('created_at',{ascending:false}).limit(30);
+  let r=sb.from('jobs').select('id,title,company,city,sector,description,logo_url,created_at',{count:'exact'}).eq('status','approved').order('created_at',{ascending:false}).limit(30);
   const k=q.value.trim().replace(/[%_,()]/g,' ');
   if(k)r=r.or('title.ilike.%'+k+'%,company.ilike.%'+k+'%');
   if(c.value)r=r.eq('city',c.value);
   if(s.value)r=r.eq('sector',s.value);
-  const {data,error}=await r;list.replaceChildren();
+  const {data,error,count}=await r;list.replaceChildren();
+  ht.textContent=lang==='ar'?'اعثر على وظيفتك من بين '+(count||0)+' عرض':'Trouvez votre futur job parmi '+(count||0)+' offres';
   if(error||!data.length){list.append(el('p','muted',t('none')));return}
-  data.forEach(j=>list.append(jobCard(j)));
+  data.forEach(j=>list.append(bigCard(j)));
 }
-f.onsubmit=e=>{e.preventDefault();load()};load();
+async function loadLogos(){
+  const {data}=await sb.from('jobs').select('company,logo_url').eq('status','approved').order('created_at',{ascending:false}).limit(60);
+  const seen=new Set();strip.replaceChildren();
+  (data||[]).forEach(j=>{
+    const key=j.company.toLowerCase();if(seen.has(key))return;seen.add(key);
+    const b=el('div','lg');b.title=j.company;
+    const l=logoImg(j.logo_url);
+    if(l)b.append(l);else b.append(el('div','ini',j.company.trim().charAt(0).toUpperCase()));
+    strip.append(b);
+  });
+  if(!seen.size){rt.hidden=true;strip.hidden=true}
+}
+f.onsubmit=e=>{e.preventDefault();load()};load();loadLogos();
 </script></body></html>
