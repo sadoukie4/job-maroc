@@ -11,8 +11,27 @@ init();
   const id=new URLSearchParams(location.search).get('id');
   const {data}=await sb.from('jobs').select('*').eq('id',id).eq('status','approved').maybeSingle();
   if(!data){d.append(el('p','muted',t('none')));return}
-  document.title=data.title+' – JOB Maroc';
-  const tg=el('div');tg.append(el('span','tag',L(CITIES,data.city)),el('span','tag',L(SECTORS,data.sector)));
-  d.append(el('h1',null,data.title),el('p','muted',data.company),tg,el('pre','d',data.description),el('h3',null,t('apply')),el('p',null,data.contact));
+  document.title=data.title+' – '+data.company+' – JOB Maroc';
+
+  if(data.logo_url){const l=logoImg(data.logo_url);if(l){l.classList.add('big');d.append(l)}}
+
+  const tg=el('div');
+  tg.append(el('span','tag',L(CITIES,data.city)),el('span','tag',L(SECTORS,data.sector)),
+            el('span','tag',new Date(data.created_at).toLocaleDateString(lang==='ar'?'ar-MA':'fr-FR')));
+
+  d.append(el('h1',null,data.title),el('p','muted',data.company),tg,
+           el('pre','d',data.description),
+           el('h3',null,t('apply')),el('p',null,data.contact));
+
+  if(data.source_url&&/^https?:\/\//.test(data.source_url)){
+    const a=el('a','btn',lang==='ar'?'التقديم على الموقع الرسمي':'Postuler sur le site officiel');
+    a.href=data.source_url;a.target='_blank';a.rel='noopener noreferrer nofollow';
+    d.append(a);
+  }
+
+  const w=el('a','btn wa',lang==='ar'?'مشاركة عبر واتساب':'Partager sur WhatsApp');
+  w.href='https://wa.me/?text='+encodeURIComponent(data.title+' - '+data.company+'\n'+location.href);
+  w.target='_blank';w.rel='noopener noreferrer';
+  d.append(w);
 })();
 </script></body></html>
