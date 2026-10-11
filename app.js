@@ -10,22 +10,10 @@ const L=(list,v)=>{const x=list.find(a=>a[0]===v);return x?x[lang==='ar'?1:0]:v}
 function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
 function opts(sel,list,all){sel.replaceChildren();if(all){const o=el('option',null,t('all'));o.value='';sel.append(o)}list.forEach(a=>{const o=el('option',null,a[lang==='ar'?1:0]);o.value=a[0];sel.append(o)})}
 function msg(box,text,ok){box.replaceChildren(el('div','msg '+(ok?'ok':'err'),text))}
-function jobCard(j){const a=el('a','card');a.href='job.html?id='+encodeURIComponent(j.id);a.append(el('h3',null,j.title),el('div','muted',j.company));const d=el('div');d.append(el('span','tag',L(CITIES,j.city)),el('span','tag',L(SECTORS,j.sector)));a.append(d);return a}
-function init(){
-  document.documentElement.lang=lang;
-  document.documentElement.dir=lang==='ar'?'rtl':'ltr';
-  document.getElementById('hd').innerHTML='<a href="index.html">💼 JOB Maroc</a><nav><a href="index.html">'+t('home')+'</a><a href="espace.html">'+t('space')+'</a><button id="lg">'+(lang==='ar'?'FR':'عربي')+'</button></nav>';
-  document.getElementById('lg').onclick=()=>{localStorage.setItem('lang',lang==='ar'?'fr':'ar');location.reload()};
-  document.querySelectorAll('[data-i]').forEach(e=>e.textContent=t(e.dataset.i));
-  document.querySelectorAll('[data-p]').forEach(e=>e.placeholder=t(e.dataset.p));
-}
+function logoImg(url){if(!url)return null;const i=el('img','logo');i.src=url;i.alt='';i.loading='lazy';return i}
+function jobCard(j){const a=el('a','card');a.href='job.html?id='+encodeURIComponent(j.id);const l=logoImg(j.logo_url);if(l)a.append(l);const w=el('div','ct');w.append(el('h3',null,j.title),el('div','muted',j.company));const d=el('div');d.append(el('span','tag',L(CITIES,j.city)),el('span','tag',L(SECTORS,j.sector)));w.append(d);a.append(w);return a}
 function bigCard(j){
   const a=el('a','card big');a.href='job.html?id='+encodeURIComponent(j.id);
   const l=logoImg(j.logo_url);
   a.append(l||el('div','ini',(j.company||'?').trim().charAt(0).toUpperCase()));
-  const d=new Date(j.created_at).toLocaleDateString(lang==='ar'?'ar-MA':'fr-FR');
-  a.append(el('h3',null,j.title),el('div','muted',d+' | '+j.company));
-  const tg=el('div');tg.append(el('span','tag',L(CITIES,j.city)),el('span','tag',L(SECTORS,j.sector)));
-  a.append(tg,el('div','ds',(j.description||'').slice(0,220)));
-  return a;
-}
+  const d=new
