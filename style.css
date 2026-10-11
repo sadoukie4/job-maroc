@@ -37,3 +37,14 @@ a.card.big .ini{width:84px;height:84px;margin:0 auto 10px;border-radius:12px;bac
 a.card.big h3{font-size:17px}
 a.card.big .ds{font-size:14px;color:#6b7480;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;text-align:start;margin-top:6px}
 .btn.wa{background:#25D366;color:#073b1e}
+main{max-width:900px}
+.grid{display:block}
+a.card.big{display:flex;gap:16px;align-items:flex-start;text-align:start;margin:12px 0}
+a.card.big .logo,a.card.big .ini{margin:0;flex:none;width:80px;height:80px}
+a.card.big .bd{min-width:0;flex:1}
+a.card.big h3{color:var(--c);margin:0 0 4px}
+a.card.big .ds{-webkit-line-clamp:3;margin:6px 0}
+.info{font-size:14px;color:#6b7480;margin:2px 0}
+.pg{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0}
+.pg button{width:auto;padding:8px 14px;margin:0}
+@media(max-width:560px){a.card.big{flex-direction:column}}
