@@ -1,0 +1,18 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JOB Maroc</title><link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script><script src="app.js"></script></head>
+<body><header id="hd"></header><main>
+<a href="index.html" data-i="back"></a><div id="d"></div></main>
+<script>
+init();
+(async()=>{
+  const id=new URLSearchParams(location.search).get('id');
+  const {data}=await sb.from('jobs').select('*').eq('id',id).eq('status','approved').maybeSingle();
+  if(!data){d.append(el('p','muted',t('none')));return}
+  document.title=data.title+' – JOB Maroc';
+  const tg=el('div');tg.append(el('span','tag',L(CITIES,data.city)),el('span','tag',L(SECTORS,data.sector)));
+  d.append(el('h1',null,data.title),el('p','muted',data.company),tg,el('pre','d',data.description),el('h3',null,t('apply')),el('p',null,data.contact));
+})();
+</script></body></html>
