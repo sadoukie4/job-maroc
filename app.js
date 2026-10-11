@@ -16,4 +16,28 @@ function bigCard(j){
   const a=el('a','card big');a.href='job.html?id='+encodeURIComponent(j.id);
   const l=logoImg(j.logo_url);
   a.append(l||el('div','ini',(j.company||'?').trim().charAt(0).toUpperCase()));
-  const d=new
+  const d=new Date(j.created_at).toLocaleDateString(lang==='ar'?'ar-MA':'fr-FR');
+  a.append(el('h3',null,j.title),el('div','muted',d+' | '+j.company));
+  const tg=el('div');tg.append(el('span','tag',L(CITIES,j.city)),el('span','tag',L(SECTORS,j.sector)));
+  a.append(tg,el('div','ds',(j.description||'').slice(0,220)));
+  return a;
+}
+async function uploadLogo(file){
+  if(!file)return null;
+  if(!['image/png','image/jpeg','image/webp'].includes(file.type))throw new Error('PNG, JPG ou WEBP seulement');
+  if(file.size>204800)throw new Error('Logo trop lourd (max 200 Ko)');
+  const {data:{session}}=await sb.auth.getSession();
+  const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
+  const path=session.user.id+'/'+crypto.randomUUID()+'.'+ext;
+  const {error}=await sb.storage.from('logos').upload(path,file,{contentType:file.type});
+  if(error)throw error;
+  return sb.storage.from('logos').getPublicUrl(path).data.publicUrl;
+}
+function init(){
+  document.documentElement.lang=lang;
+  document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+  document.getElementById('hd').innerHTML='<a href="index.html">💼 JOB Maroc</a><nav><a href="index.html">'+t('home')+'</a><a href="espace.html">'+t('space')+'</a><button id="lg">'+(lang==='ar'?'FR':'عربي')+'</button></nav>';
+  document.getElementById('lg').onclick=()=>{localStorage.setItem('lang',lang==='ar'?'fr':'ar');location.reload()};
+  document.querySelectorAll('[data-i]').forEach(e=>e.textContent=t(e.dataset.i));
+  document.querySelectorAll('[data-p]').forEach(e=>e.placeholder=t(e.dataset.p));
+}
