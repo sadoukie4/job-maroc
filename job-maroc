@@ -1,4 +1,4 @@
-const CONFIG = {
-  URL: "https://VOTRE-PROJET.supabase.co",
-  KEY: "VOTRE_CLE_ANON"
-};
+   const CONFIG = {
+     URL: "https://expmcczlujsrhcfzyoff.supabase.co",
+     KEY: "COLLEZ_ICI_VOTRE_CLE"
+   };
