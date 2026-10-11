@@ -17,16 +17,26 @@
 <script>
 init();opts(c,CITIES,1);opts(s,SECTORS,1);
 rt.textContent=lang==='ar'?'شركات تقوم بالتوظيف':'Les entreprises qui recrutent';
+let page=0;const PS=10;let total=0;
 async function load(){
-  let r=sb.from('jobs').select('id,title,company,city,sector,description,logo_url,created_at',{count:'exact'}).eq('status','approved').order('created_at',{ascending:false}).limit(30);
+  let r=sb.from('jobs').select('id,title,company,city,sector,description,logo_url,created_at,contract,experience,function',{count:'exact'}).eq('status','approved').order('created_at',{ascending:false}).range(page*PS,page*PS+PS-1);
   const k=q.value.trim().replace(/[%_,()]/g,' ');
   if(k)r=r.or('title.ilike.%'+k+'%,company.ilike.%'+k+'%');
   if(c.value)r=r.eq('city',c.value);
   if(s.value)r=r.eq('sector',s.value);
   const {data,error,count}=await r;list.replaceChildren();
-  ht.textContent=lang==='ar'?'اعثر على وظيفتك من بين '+(count||0)+' عرض':'Trouvez votre futur job parmi '+(count||0)+' offres';
-  if(error||!data.length){list.append(el('p','muted',t('none')));return}
-  data.forEach(j=>list.append(bigCard(j)));
+  total=count||0;
+  ht.textContent=lang==='ar'?'اعثر على وظيفتك من بين '+total+' عرض':'Trouvez votre futur job parmi '+total+' offres';
+  if(error||!data||!data.length){list.append(el('p','muted',t('none')));pager();return}
+  data.forEach(j=>list.append(bigCard(j)));pager();
+}
+function pager(){
+  let p=document.getElementById('pg');if(!p){p=el('div','pg');p.id='pg';list.after(p)}
+  p.replaceChildren();const n=Math.max(1,Math.ceil(total/PS));
+  const pv=el('button','btn sec',lang==='ar'?'السابق':'Précédent'),nx=el('button','btn sec',lang==='ar'?'التالي':'Suivant');
+  pv.disabled=page===0;nx.disabled=page>=n-1;
+  pv.onclick=()=>{page--;load();scrollTo(0,0)};nx.onclick=()=>{page++;load();scrollTo(0,0)};
+  p.append(pv,el('span',null,(lang==='ar'?'صفحة ':'Page ')+(page+1)+(lang==='ar'?' من ':' sur ')+n),nx);
 }
 async function loadLogos(){
   const {data}=await sb.from('jobs').select('company,logo_url').eq('status','approved').order('created_at',{ascending:false}).limit(60);
@@ -40,5 +50,5 @@ async function loadLogos(){
   });
   if(!seen.size){rt.hidden=true;strip.hidden=true}
 }
-f.onsubmit=e=>{e.preventDefault();load()};load();loadLogos();
+f.onsubmit=e=>{e.preventDefault();page=0;load()};load();loadLogos();
 </script></body></html>
