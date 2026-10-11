@@ -1,0 +1,33 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Admin – JOB Maroc</title><link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script><script src="app.js"></script></head>
+<body><header id="hd"></header><main>
+<h2 data-i="toval"></h2><div id="box"></div><div id="out"></div></main>
+<script>
+init();
+(async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){location.href='espace.html';return}
+  const {data:p}=await sb.from('profiles').select('role').eq('id',session.user.id).maybeSingle();
+  if(!p||p.role!=='admin'){box.append(el('p',null,t('noadmin')));return}
+  load();
+})();
+async function load(){
+  const {data}=await sb.from('jobs').select('*').eq('status','pending').order('created_at');
+  out.replaceChildren();
+  if(!data||!data.length){out.append(el('p','muted',t('none')));return}
+  data.forEach(j=>{
+    const c=el('div','card');
+    c.append(el('h3',null,j.title),el('div','muted',j.company+' · '+L(CITIES,j.city)+' · '+L(SECTORS,j.sector)),el('pre','d',j.description),el('p',null,j.contact));
+    const r=el('div','row');
+    [['approve','approved',''],['reject','rejected','red']].forEach(([k,st,cl])=>{
+      const b=el('button','btn '+cl,t(k));
+      b.onclick=async()=>{await sb.from('jobs').update({status:st}).eq('id',j.id);load()};
+      r.append(b)});
+    c.append(r);out.append(c);
+  });
+}
+</script></body></html>
