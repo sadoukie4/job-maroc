@@ -1,0 +1,46 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JOB Maroc – Espace entreprise</title><link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script><script src="app.js"></script></head>
+<body><header id="hd"></header><main><div id="box"></div><div id="app"></div></main>
+<script>
+init();
+function field(tag,ph,type){const e=el(tag);if(type)e.type=type;e.placeholder=ph;e.required=true;return e}
+async function render(){
+  const {data:{session}}=await sb.auth.getSession();
+  app.replaceChildren();
+  session?(jobForm(),myJobs(),outBtn()):authForm();
+}
+function authForm(){
+  const f=el('form'),e=field('input',t('email'),'email'),p=field('input',t('pass'),'password');
+  p.minLength=8;e.autocomplete='email';
+  const b=el('button','btn',t('login')),b2=el('button','btn sec',t('signup'));b2.type='button';
+  f.append(e,p,b,b2);app.append(f);
+  f.onsubmit=async ev=>{ev.preventDefault();
+    const {error}=await sb.auth.signInWithPassword({email:e.value,password:p.value});
+    error?msg(box,t('error')+error.message):(box.replaceChildren(),render())};
+  b2.onclick=async()=>{if(!f.reportValidity())return;
+    const {error}=await sb.auth.signUp({email:e.value,password:p.value,options:{emailRedirectTo:location.origin+'/espace.html'}});
+    error?msg(box,t('error')+error.message):msg(box,t('checkmail'),1)};
+}
+function jobForm(){
+  const f=el('form'),ti=field('input',t('title')),co=field('input',t('company')),ci=el('select'),se=el('select'),
+        de=field('textarea',t('desc')),ct=field('input',t('contact')),b=el('button','btn',t('send'));
+  ti.maxLength=120;co.maxLength=100;de.maxLength=5000;de.minLength=20;ct.maxLength=150;ct.minLength=5;
+  opts(ci,CITIES);opts(se,SECTORS);
+  f.append(el('h2',null,t('post')),ti,co,ci,se,de,ct,b);app.append(f);
+  f.onsubmit=async ev=>{ev.preventDefault();
+    const {error}=await sb.from('jobs').insert({title:ti.value.trim(),company:co.value.trim(),city:ci.value,sector:se.value,description:de.value.trim(),contact:ct.value.trim()});
+    if(error)return msg(box,t('error')+error.message);
+    msg(box,t('sent'),1);f.reset();myJobs()};
+}
+async function myJobs(){
+  let w=document.getElementById('mj');if(!w){w=el('div');w.id='mj';app.append(w)}
+  const {data}=await sb.from('jobs').select('id,title,status').order('created_at',{ascending:false});
+  w.replaceChildren(el('h2',null,t('mine')));
+  (data||[]).forEach(j=>{const c=el('div','card');c.append(el('b',null,j.title+' '),el('span','tag',t(j.status)));w.append(c)});
+}
+function outBtn(){const b=el('button','btn sec',t('logout'));b.onclick=async()=>{await sb.auth.signOut();render()};app.append(b)}
+render();
+</script></body></html>
