@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JOB Maroc – Offres d'emploi</title>
+<meta name="description" content="Offres d'emploi au Maroc par métier, ville et secteur">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="config.js"></script><script src="app.js"></script></head>
+<body><header id="hd"></header><main>
+<form id="f"><input id="q" data-p="job">
+<div class="row"><select id="c"></select><select id="s"></select></div>
+<button class="btn" data-i="search"></button></form>
+<h2 data-i="latest"></h2><div id="list"></div></main>
+<script>
+init();opts(c,CITIES,1);opts(s,SECTORS,1);
+async function load(){
+  let r=sb.from('jobs').select('id,title,company,city,sector').eq('status','approved').order('created_at',{ascending:false}).limit(30);
+  const k=q.value.trim().replace(/[%_,()]/g,' ');
+  if(k)r=r.or('title.ilike.%'+k+'%,company.ilike.%'+k+'%');
+  if(c.value)r=r.eq('city',c.value);
+  if(s.value)r=r.eq('sector',s.value);
+  const {data,error}=await r;list.replaceChildren();
+  if(error||!data.length){list.append(el('p','muted',t('none')));return}
+  data.forEach(j=>list.append(jobCard(j)));
+}
+f.onsubmit=e=>{e.preventDefault();load()};load();
+</script></body></html>
