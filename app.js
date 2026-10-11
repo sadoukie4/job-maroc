@@ -19,3 +19,13 @@ function init(){
   document.querySelectorAll('[data-i]').forEach(e=>e.textContent=t(e.dataset.i));
   document.querySelectorAll('[data-p]').forEach(e=>e.placeholder=t(e.dataset.p));
 }
+function bigCard(j){
+  const a=el('a','card big');a.href='job.html?id='+encodeURIComponent(j.id);
+  const l=logoImg(j.logo_url);
+  a.append(l||el('div','ini',(j.company||'?').trim().charAt(0).toUpperCase()));
+  const d=new Date(j.created_at).toLocaleDateString(lang==='ar'?'ar-MA':'fr-FR');
+  a.append(el('h3',null,j.title),el('div','muted',d+' | '+j.company));
+  const tg=el('div');tg.append(el('span','tag',L(CITIES,j.city)),el('span','tag',L(SECTORS,j.sector)));
+  a.append(tg,el('div','ds',(j.description||'').slice(0,220)));
+  return a;
+}
