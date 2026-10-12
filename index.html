@@ -38,17 +38,68 @@ function pager(){
   pv.onclick=()=>{page--;load();scrollTo(0,0)};nx.onclick=()=>{page++;load();scrollTo(0,0)};
   p.append(pv,el('span',null,(lang==='ar'?'صفحة ':'Page ')+(page+1)+(lang==='ar'?' من ':' sur ')+n),nx);
 }
-async function loadLogos(){
-  const {data}=await sb.from('jobs').select('company,logo_url').eq('status','approved').order('created_at',{ascending:false}).limit(60);
-  const seen=new Set();strip.replaceChildren();
-  (data||[]).forEach(j=>{
-    const key=j.company.toLowerCase();if(seen.has(key))return;seen.add(key);
-    const b=el('div','lg');b.title=j.company;
-    const l=logoImg(j.logo_url);
-    if(l)b.append(l);else b.append(el('div','ini',j.company.trim().charAt(0).toUpperCase()));
-    strip.append(b);
-  });
-  if(!seen.size){rt.hidden=true;strip.hidden=true}
-}
-f.onsubmit=e=>{e.preventDefault();page=0;load()};load();loadLogos();
-</script></body></html>
+
+async function load() {
+  list.replaceChildren();
+
+  ht.textContent =
+    lang === 'ar' ? 'جاري تحميل عروض العمل...' : 'Chargement des offres...';
+
+  let r = sb
+    .from('jobs')
+    .select(
+      'id,title,company,city,sector,description,logo_url,created_at,contract,experience,function',
+      { count: 'exact' }
+    )
+    .eq('status', 'approved')
+    .order('created_at', { ascending: false })
+    .range(page * PS, page * PS + PS - 1);
+
+  const k = q.value.trim().replace(/[%_,()]/g, ' ');
+
+  if (k) {
+    r = r.or(`title.ilike.%${k}%,company.ilike.%${k}%`);
+  }
+
+  if (c.value) r = r.eq('city', c.value);
+  if (s.value) r = r.eq('sector', s.value);
+
+  const { data, error, count } = await r;
+
+  if (error) {
+    console.error('JOB Maroc / Supabase:', error);
+
+    ht.textContent =
+      lang === 'ar' ? 'تعذر تحميل عروض العمل' : 'Erreur de chargement';
+
+    list.append(
+      el(
+        'p',
+        'msg err',
+        (lang === 'ar' ? 'خطأ في قاعدة البيانات: ' : 'Erreur Supabase : ')
+        + error.message
+      )
+    );
+
+    const oldPager = document.getElementById('pg');
+    if (oldPager) oldPager.remove();
+    return;
+  }
+
+  total = count ?? 0;
+
+  ht.textContent =
+    lang === 'ar'
+      ? `اعثر على وظيفتك من بين ${total} عرض`
+      : `Trouvez votre futur job parmi ${total} offres`;
+
+  if (!data || data.length === 0) {
+    list.append(el('p', 'muted', t('none')));
+    pager();
+    return;
+  }
+
+  data.forEach(j => list.append(bigCard(j)));
+  pager();
+  }
+  
